@@ -5,7 +5,7 @@ package data.lab.http.client;
  *
  */
 
-import data.lab.ongdb.remote.http.HttpRequestProxy;
+import data.lab.ongdb.http.HttpRequestProxy;
 import org.junit.Before;
 import org.junit.Test;
 

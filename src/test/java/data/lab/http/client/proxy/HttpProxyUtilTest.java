@@ -5,12 +5,12 @@ package data.lab.http.client.proxy;
  *
  */
 
-import data.lab.ongdb.remote.http.proxy.HttpAddress;
+import data.lab.ongdb.http.proxy.HttpAddress;
 import org.apache.log4j.PropertyConfigurator;
-import data.lab.ongdb.remote.http.ClientConfiguration;
-import data.lab.ongdb.remote.http.HttpHost;
-import data.lab.ongdb.remote.http.HttpRequestProxy;
-import data.lab.ongdb.remote.http.proxy.HttpProxyUtil;
+import data.lab.ongdb.http.ClientConfiguration;
+import data.lab.ongdb.http.HttpHost;
+import data.lab.ongdb.http.HttpRequestProxy;
+import data.lab.ongdb.http.proxy.HttpProxyUtil;
 import org.junit.Before;
 import org.junit.Test;
 

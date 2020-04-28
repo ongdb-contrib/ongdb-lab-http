@@ -5,7 +5,7 @@ package data.lab.http.client;
  *
  */
 
-import data.lab.ongdb.remote.http.HttpRequestUtil;
+import data.lab.ongdb.http.HttpRequestUtil;
 import org.junit.Test;
 
 /**

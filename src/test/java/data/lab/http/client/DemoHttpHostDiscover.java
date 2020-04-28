@@ -6,10 +6,10 @@ package data.lab.http.client;
  */
 
 import org.frameworkset.spi.assemble.GetProperties;
-import data.lab.ongdb.remote.http.ClientConfiguration;
-import data.lab.ongdb.remote.http.HttpHost;
-import data.lab.ongdb.remote.http.proxy.HttpHostDiscover;
-import data.lab.ongdb.remote.http.proxy.HttpServiceHostsConfig;
+import data.lab.ongdb.http.ClientConfiguration;
+import data.lab.ongdb.http.HttpHost;
+import data.lab.ongdb.http.proxy.HttpHostDiscover;
+import data.lab.ongdb.http.proxy.HttpServiceHostsConfig;
 
 import java.util.ArrayList;
 import java.util.List;

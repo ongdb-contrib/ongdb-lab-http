@@ -5,9 +5,9 @@ package data.lab.http.client;
  *
  */
 
-import data.lab.ongdb.remote.http.HttpHost;
-import data.lab.ongdb.remote.http.HttpRequestProxy;
-import data.lab.ongdb.remote.http.proxy.HttpProxyUtil;
+import data.lab.ongdb.http.HttpHost;
+import data.lab.ongdb.http.HttpRequestProxy;
+import data.lab.ongdb.http.proxy.HttpProxyUtil;
 import org.junit.Before;
 import org.junit.Test;
 
