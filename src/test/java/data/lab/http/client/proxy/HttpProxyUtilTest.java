@@ -32,7 +32,7 @@ public class HttpProxyUtilTest {
 
     @Before
     public void setUp() throws Exception {
-        PropertyConfigurator.configureAndWatch("config" + File.separator + "log4j.properties");
+        PropertyConfigurator.configureAndWatch("conf" + File.separator + "log4j.properties");
     }
 
     @Test
