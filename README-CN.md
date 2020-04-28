@@ -10,7 +10,7 @@
 ## 包含的功能有：
 - http连接池
 - http服务调用组件-HttpRequestUtil
-- http负载均衡组件-HttpRequestProxy  使用参考文档https://esdoc.bbossgroups.com/#/httpproxy
+- http负载均衡组件-HttpRequestProxy
 ## 负载均衡组件特点：
 - 1.服务负载均衡（目前提供RoundRobin负载算法）
 - 2.服务健康检查
