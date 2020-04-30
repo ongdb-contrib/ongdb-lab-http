@@ -13,6 +13,7 @@
 - 6.服务安全认证（配置basic账号和口令）
 - 7.主备路由/异地灾备特色
  >负载均衡器主备功能开发，如果主节点全部挂掉，请求转发到可用的备用节点，如果备用节点也挂了，就抛出异常，如果主节点恢复正常，那么请求重新发往主节点 
-
-
+- 8.The Neo4j HTTP API Docs v3.5:https://neo4j.com/docs/http-api/3.5/
+- 9.https://neo4j.com/docs/#http-api-transactional
+- 10.https://neo4j.com/docs/rest-docs/current/
 
