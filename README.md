@@ -327,7 +327,7 @@ http://localhost:7474/db/data/transaction/9
   } ]
 }
 ```
-# OTHER
+# OTHER REFERENCE
 # Streaming
 ```
 GET http://localhost:7474/db/data/
