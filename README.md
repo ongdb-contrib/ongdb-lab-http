@@ -1,5 +1,15 @@
 # ONgDB-LAB-HTTP
 # TRANSACTION HTTP API [RECOMMENDED USE]
+- Root discovery
+```
+GET http://localhost:7474/
+{
+  "bolt_routing": "bolt+routing://pro-ongdb-1:7687",
+  "data": "http://pro-ongdb-1:7474/db/data/",
+  "management": "http://pro-ongdb-1:7474/db/manage/",
+  "bolt": "bolt://pro-ongdb-1:7687"
+}
+```
 - Begin and commit a transaction in one request
 ```
 http://localhost:7474/db/data/transaction/commit
