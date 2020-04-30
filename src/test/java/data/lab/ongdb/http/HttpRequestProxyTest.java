@@ -1,11 +1,10 @@
-package data.lab.http.client;
+package data.lab.ongdb.http;
 /*
  *
  * Data Lab - graph database organization.
  *
  */
 
-import data.lab.ongdb.http.HttpRequestProxy;
 import org.junit.Before;
 import org.junit.Test;
 

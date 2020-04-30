@@ -1,15 +1,13 @@
-package data.lab.http.client.proxy;
+package data.lab.ongdb.http.proxy;
 /*
  *
  * Data Lab - graph database organization.
  *
  */
 
-import data.lab.ongdb.http.proxy.HttpHostDiscover;
 import org.frameworkset.spi.assemble.GetProperties;
 import data.lab.ongdb.http.ClientConfiguration;
 import data.lab.ongdb.http.HttpHost;
-import data.lab.ongdb.http.proxy.HttpServiceHostsConfig;
 
 import java.util.ArrayList;
 import java.util.List;

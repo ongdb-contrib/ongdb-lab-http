@@ -1,4 +1,4 @@
-package data.lab.http.client;
+package data.lab.ongdb.http;
 /*
  *
  * Data Lab - graph database organization.

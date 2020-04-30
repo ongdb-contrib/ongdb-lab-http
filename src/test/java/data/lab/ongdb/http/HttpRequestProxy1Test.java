@@ -1,11 +1,10 @@
-package data.lab.http.client;
+package data.lab.ongdb.http;
 /*
  *
  * Data Lab - graph database organization.
  *
  */
 
-import data.lab.ongdb.http.HttpRequestProxy;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -14,11 +13,11 @@ import java.util.Map;
 
 /**
  * @author Yc-Ma
- * @PACKAGE_NAME: org.frameworkset.http.client.HttpRequestProxyEnvTest
+ * @PACKAGE_NAME: org.frameworkset.http.client.HttpRequestProxy1Test
  * @Description: TODO
  * @date 2020/4/28 15:04
  */
-public class HttpRequestProxyEnvTest {
+public class HttpRequestProxy1Test {
     @Before
     public void startPool() {
 //		HttpRequestProxy.startHttpPools("application.properties");
@@ -41,9 +40,8 @@ public class HttpRequestProxyEnvTest {
          # 指定本地区信息，系统按地区部署时，指定地区信息，
          # 不同的地区请求只路由到本地区（beijing）对应的服务器，shanghai的服务器作为backup服务器，
          # 当本地(beijing)的服务器都不可用时，才将请求转发到可用的上海服务器
-         # 从系统环境变量获取路由信息
          */
-        configs.put("report.http.routing", "#[area]");
+        configs.put("report.http.routing", "beijing");
         HttpRequestProxy.startHttpPools(configs);
     }
 
