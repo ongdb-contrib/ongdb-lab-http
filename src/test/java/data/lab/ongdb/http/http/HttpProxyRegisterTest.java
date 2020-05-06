@@ -28,7 +28,7 @@ public class HttpProxyRegisterTest {
 
     @Before
     public void setUp() throws Exception {
-        PropertyConfigurator.configureAndWatch("resources" + File.separator + "log4j.properties");
+        PropertyConfigurator.configureAndWatch("conf" + File.separator + "log4j.properties");
         HttpProxyRegister.register("pro-ongdb-1:7474", "neo4j", "datalab%pro");
         String queryResult = request.httpGet("/user/neo4j");
         System.out.println(queryResult);

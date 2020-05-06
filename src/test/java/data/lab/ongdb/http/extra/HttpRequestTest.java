@@ -32,7 +32,7 @@ public class HttpRequestTest {
 
     @Before
     public void setUp() throws Exception {
-        PropertyConfigurator.configureAndWatch("resources" + File.separator + "log4j.properties");
+        PropertyConfigurator.configureAndWatch("conf" + File.separator + "log4j.properties");
     }
 
     @Test

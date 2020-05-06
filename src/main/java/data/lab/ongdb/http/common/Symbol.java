@@ -12,7 +12,9 @@ public enum Symbol {
 
     DIVIDE_SPLIT("/"),
 
-    COMMA_CHARACTER(",");
+    COMMA_CHARACTER(","),
+
+    SPLIT_CHARACTER("\\|");
 
     private String symbol;
 

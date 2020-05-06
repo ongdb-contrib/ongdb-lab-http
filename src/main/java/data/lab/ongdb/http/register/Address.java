@@ -16,30 +16,12 @@ import java.util.Objects;
 public class Address {
     private String host;
     private int port;
+    private Protocol protocol;
 
-    private Role role;
-
-    public Address() {
-    }
-
-    public Address(String host, int port) {
+    public Address(String host, int port, Protocol protocol) {
         this.host = host;
         this.port = port;
-    }
-
-    public static Address pack(String v) {
-        String[] ipPort = v.split(":");
-        String ip = ipPort[0];
-        String port = ipPort[1];
-        return new Address(ip, Integer.parseInt(port));
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
+        this.protocol = protocol;
     }
 
     public String getHost() {
@@ -58,25 +40,12 @@ public class Address {
         this.port = port;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Address address = (Address) o;
-        return port == address.port &&
-                Objects.equals(host, address.host);
+    public Protocol getProtocol() {
+        return protocol;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(host, port);
-    }
-
-    @Override
-    public String toString() {
-        return "Address{" +
-                "host='" + host + '\'' +
-                ", port=" + port +
-                '}';
+    public void setProtocol(Protocol protocol) {
+        this.protocol = protocol;
     }
 }
+
