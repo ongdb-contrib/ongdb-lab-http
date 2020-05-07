@@ -5,8 +5,6 @@ package data.lab.ongdb.http.register;
  *
  */
 
-import java.util.Objects;
-
 /**
  * @author Yc-Ma
  * @PACKAGE_NAME: data.lab.ongdb.etl.register
@@ -14,14 +12,28 @@ import java.util.Objects;
  * @date 2020/4/29 14:43
  */
 public class Address {
+    /**
+     * 发现的HOST
+     **/
     private String host;
     private int port;
     private Protocol protocol;
+    /**
+     * 初始化传入的HOST
+     **/
+    private String initHost;
 
-    public Address(String host, int port, Protocol protocol) {
+    /**
+     * false无效，true有效
+     **/
+    private boolean status;
+
+    public Address(String host, int port, Protocol protocol, String initHost, boolean status) {
         this.host = host;
         this.port = port;
         this.protocol = protocol;
+        this.initHost = initHost;
+        this.status = status;
     }
 
     public String getHost() {
@@ -46,6 +58,30 @@ public class Address {
 
     public void setProtocol(Protocol protocol) {
         this.protocol = protocol;
+    }
+
+    public String getInitHost() {
+        return initHost;
+    }
+
+    public void setInitHost(String initHost) {
+        this.initHost = initHost;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
+    public String getServerAddress() {
+        return this.host + ":" + port;
+    }
+
+    public String getServerAddressMappingLocal() {
+        return this.initHost + ":" + port;
     }
 }
 

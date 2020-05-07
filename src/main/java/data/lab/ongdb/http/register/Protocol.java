@@ -13,8 +13,19 @@ package data.lab.ongdb.http.register;
  */
 public enum Protocol {
 
+    /**
+     * BLOT协议
+     * **/
     BLOT("bolt"),
+
+    /**
+     * HTTP协议
+     * **/
     HTTP("http"),
+
+    /**
+     * HTTPS协议
+     * **/
     HTTPS("https");
 
     private String value;

@@ -100,20 +100,13 @@ public class HttpRequest implements HttpInter {
 
                 return html;
             }
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            logger.error("error", e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
             logger.error("error", e);
         } finally {
             try {
                 httpGet.clone();
             } catch (CloneNotSupportedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.error("error", e);
             }
         }
         return null;
@@ -151,20 +144,13 @@ public class HttpRequest implements HttpInter {
 
                 return html;
             }
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            logger.error("error", e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
             logger.error("error", e);
         } finally {
             try {
                 httpPost.clone();
             } catch (CloneNotSupportedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.error("error", e);
             }
         }
         return null;
@@ -203,20 +189,13 @@ public class HttpRequest implements HttpInter {
 
                 return html;
             }
-        } catch (ClientProtocolException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            logger.error("error", e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
             logger.error("error", e);
         } finally {
             try {
                 httpPut.clone();
             } catch (CloneNotSupportedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                logger.error("error", e);
             }
         }
         return null;
@@ -255,12 +234,12 @@ public class HttpRequest implements HttpInter {
                 return html;
             }
         } catch (Exception e) {
-            e.printStackTrace();
             logger.error("error", e);
         } finally {
             try {
                 httpDeleteWithBody.abort();
             } catch (Exception e) {
+                logger.error("error", e);
             }
         }
         return null;

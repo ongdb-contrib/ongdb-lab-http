@@ -16,19 +16,49 @@ import java.util.Objects;
  * @Description: TODO
  * @date 2020/5/6 20:56
  */
-public class DBServer {
+public class DbServer {
     private String id;
     private List<Address> addressList;
     private Role role;
     private JSONArray groups;
     private String database;
 
-    public DBServer(String id, List<Address> addressList, Role role, JSONArray groups, String database) {
+    /**
+     * false无效，true有效
+     **/
+    private boolean status;
+
+    /**
+     * 节点上运行的查询数量
+     **/
+    private int queryCount;
+
+    public DbServer() {
+    }
+
+    public DbServer(String id, List<Address> addressList, Role role, JSONArray groups, String database, boolean status) {
         this.id = id;
         this.addressList = addressList;
         this.role = role;
         this.groups = groups;
         this.database = database;
+        this.status = status;
+    }
+
+    public int getQueryCount() {
+        return queryCount;
+    }
+
+    public void setQueryCount(int queryCount) {
+        this.queryCount = queryCount;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 
     public String getId() {
@@ -73,14 +103,30 @@ public class DBServer {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        DBServer dbServer = (DBServer) o;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DbServer dbServer = (DbServer) o;
         return Objects.equals(id, dbServer.id);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "DbServer{" +
+                "id='" + id + '\'' +
+                ", addressList=" + addressList +
+                ", role=" + role +
+                ", groups=" + groups +
+                ", database='" + database + '\'' +
+                ", status=" + status +
+                '}';
     }
 }
