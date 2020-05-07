@@ -312,6 +312,7 @@ public class OngdbHeartBeat {
                     }
                 } catch (Exception e) {
                     LOGGER.error("Valid check fail:" + server.toString() + e);
+//                    server.setStatus(false);
                 }
             }
         }

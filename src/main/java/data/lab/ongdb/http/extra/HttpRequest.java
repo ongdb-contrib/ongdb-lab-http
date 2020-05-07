@@ -119,7 +119,7 @@ public class HttpRequest implements HttpInter {
      * @Description: TODO(POST)
      */
     @Override
-    public String httpPost(String url, String query) {
+    public synchronized String httpPost(String url, String query) {
         HttpPost httpPost = new HttpPost(url);
         try {
 
