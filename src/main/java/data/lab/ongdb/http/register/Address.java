@@ -28,6 +28,28 @@ public class Address {
      **/
     private boolean status;
 
+    /**
+     * @param host:远程主机
+     * @param port:端口
+     * @param initHost:初始化主机
+     * @return
+     * @Description: TODO
+     */
+    public Address(String host, int port, String initHost) {
+        this.host = host;
+        this.port = port;
+        this.initHost = initHost;
+    }
+
+    /**
+     * @param host:远程主机
+     * @param port:端口
+     * @param protocol:协议类型
+     * @param status:地址可用状态
+     * @param initHost:初始化主机
+     * @return
+     * @Description: TODO
+     */
     public Address(String host, int port, Protocol protocol, String initHost, boolean status) {
         this.host = host;
         this.port = port;

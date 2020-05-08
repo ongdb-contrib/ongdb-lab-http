@@ -6,6 +6,7 @@ package data.lab.ongdb.http.register;
  */
 
 import com.alibaba.fastjson.JSONArray;
+import org.neo4j.driver.Driver;
 
 import java.util.List;
 import java.util.Objects;
@@ -33,8 +34,15 @@ public class DbServer {
      **/
     private int queryCount;
 
-    public DbServer() {
-    }
+    /**
+     * BLOT驱动器-本地访问驱动
+     **/
+    private Driver driverServerAddressMappingLocal;
+
+    /**
+     * BLOT驱动器-远程映射驱动
+     **/
+    private Driver driverServerAddress;
 
     public DbServer(String id, List<Address> addressList, Role role, JSONArray groups, String database, boolean status) {
         this.id = id;
@@ -43,6 +51,34 @@ public class DbServer {
         this.groups = groups;
         this.database = database;
         this.status = status;
+    }
+
+    public DbServer(String id, List<Address> addressList, Role role, JSONArray groups, String database, boolean status, int queryCount, Driver driverServerAddressMappingLocal, Driver driverServerAddress) {
+        this.id = id;
+        this.addressList = addressList;
+        this.role = role;
+        this.groups = groups;
+        this.database = database;
+        this.status = status;
+        this.queryCount = queryCount;
+        this.driverServerAddressMappingLocal = driverServerAddressMappingLocal;
+        this.driverServerAddress = driverServerAddress;
+    }
+
+    public Driver getDriverServerAddressMappingLocal() {
+        return driverServerAddressMappingLocal;
+    }
+
+    public void setDriverServerAddressMappingLocal(Driver driverServerAddressMappingLocal) {
+        this.driverServerAddressMappingLocal = driverServerAddressMappingLocal;
+    }
+
+    public Driver getDriverServerAddress() {
+        return driverServerAddress;
+    }
+
+    public void setDriverServerAddress(Driver driverServerAddress) {
+        this.driverServerAddress = driverServerAddress;
     }
 
     public int getQueryCount() {

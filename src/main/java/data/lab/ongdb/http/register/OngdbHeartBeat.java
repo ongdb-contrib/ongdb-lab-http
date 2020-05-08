@@ -18,6 +18,9 @@ import data.lab.ongdb.http.extra.HttpProxyRequest;
 import data.lab.ongdb.http.extra.HttpRequest;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.neo4j.driver.AuthTokens;
+import org.neo4j.driver.Driver;
+import org.neo4j.driver.GraphDatabase;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -33,7 +36,7 @@ public class OngdbHeartBeat {
 
     private static final Logger LOGGER = LogManager.getLogger(OngdbHeartBeat.class);
 
-    private static final Map<String, String> HOST_MAP = new HashMap<>();
+    private static Map<String, String> HOST_MAP = new HashMap<>();
 
     private static final Map<Role, CopyOnWriteArrayList<DbServer>> ROLE_LIST_MAP = new ConcurrentHashMap<>();
 
@@ -66,7 +69,7 @@ public class OngdbHeartBeat {
     /**
      * 默认未注册心跳检测机制
      **/
-    private final boolean IS_REGISTER;
+    private static boolean IS_REGISTER = false;
 
     private final String[] servers;
 
@@ -88,10 +91,24 @@ public class OngdbHeartBeat {
      **/
     public static boolean IS_PRINT_CLUSTER_INFO = false;
 
+    /**
+     * 是否添加BLOT驱动
+     **/
+    public static boolean IS_ADD_BLOT_DRIVER = false;
+
+    private final String authAccount;
+
+    private final String authPassword;
+
     public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword, int delay) {
         if (HOST_MAP.isEmpty()) {
             throw new IllegalArgumentException();
         }
+
+        IS_REGISTER = true;
+        this.authAccount = authAccount;
+        this.authPassword = authPassword;
+
         this.servers = Objects.requireNonNull(ipPorts).split(Symbol.SPLIT_CHARACTER.getSymbolValue());
         this.delay = delay;
 
@@ -110,7 +127,6 @@ public class OngdbHeartBeat {
             // 单节点不运行监控线程
             packDefaultHost();
         }
-        this.IS_REGISTER = true;
     }
 
     private void initRun() {
@@ -125,6 +141,48 @@ public class OngdbHeartBeat {
 
         // 移除无效状态的DB SERVER
         removeNotValid();
+
+        // 添加BLOT驱动
+        if (IS_ADD_BLOT_DRIVER) {
+            addBlotDriver();
+        }
+    }
+
+    /**
+     * @param
+     * @return
+     * @Description: TODO(ROLE_LIST_MAP添加驱动)
+     */
+    private void addBlotDriver() {
+        Collection<CopyOnWriteArrayList<DbServer>> dbServerCollection = ROLE_LIST_MAP.values();
+        for (List<DbServer> dbServerList : dbServerCollection) {
+            for (DbServer server : dbServerList) {
+                Address address = getHttpAddress(server.getAddressList());
+                // 本地映射
+                String serverAddressMappingLocal = address.getServerAddressMappingLocal();
+                // 不存在驱动则添加
+                if (server.getDriverServerAddressMappingLocal() == null) {
+                    Driver driverServerAddressMappingLocal = GraphDatabase.driver(AccessPrefix.SINGLE_NODE + serverAddressMappingLocal, AuthTokens.basic(authAccount, authPassword));
+                    server.setDriverServerAddressMappingLocal(driverServerAddressMappingLocal);
+                }
+                // 远程主机名
+                String serverAddress = address.getServerAddress();
+                // 不存在驱动则添加
+                if (server.getDriverServerAddress() == null) {
+                    Driver driverServerAddress = GraphDatabase.driver(AccessPrefix.SINGLE_NODE + serverAddressMappingLocal, AuthTokens.basic(authAccount, authPassword));
+                    server.setDriverServerAddress(driverServerAddress);
+                }
+            }
+        }
+    }
+
+    private static Address getHttpAddress(List<Address> addressList) {
+        for (Address address : addressList) {
+            if (Protocol.BLOT.equals(address.getProtocol())) {
+                return address;
+            }
+        }
+        return new Address("127.0.0.1", 7687, Protocol.BLOT, "localhost", true);
     }
 
     /**
@@ -140,6 +198,10 @@ public class OngdbHeartBeat {
                 this::checkTheLoad, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
                 this::removeNotValid, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
+        if (IS_ADD_BLOT_DRIVER) {
+            Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
+                    this::addBlotDriver, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
+        }
         LOGGER.info("ONgDB heartbeat detection run... " + "ongdb.heartbeat.detection.interval:" + this.delay + "s");
     }
 
@@ -218,6 +280,15 @@ public class OngdbHeartBeat {
                 i += 1;
             }
         }
+    }
+
+    /**
+     * @param
+     * @return
+     * @Description: TODO(KEY是远程节点的主机名 ， VALUE是可以访问远程节点的主机名或者IP)
+     */
+    public static void setHostMap(Map<String, String> hostMap) {
+        HOST_MAP = hostMap;
     }
 
     private void checkTheLoad() {
@@ -561,9 +632,17 @@ public class OngdbHeartBeat {
      * @return
      * @Description: TODO(注册标志位)
      */
-    public boolean isRegister() {
+    public static boolean isRegister() {
         return IS_REGISTER;
     }
 
+    /**
+     * @param
+     * @return
+     * @Description: TODO(获取集群路由信息)
+     */
+    public Map<Role, CopyOnWriteArrayList<DbServer>> getRoleListMap() {
+        return ROLE_LIST_MAP;
+    }
 }
 

@@ -6,6 +6,8 @@ import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.File;
 
+import static org.junit.Assert.*;
+
 /*
  *
  * Data Lab - graph database organization.
@@ -16,9 +18,9 @@ import java.io.File;
  * @author Yc-Ma
  * @PACKAGE_NAME: data.lab.ongdb.http.register
  * @Description: TODO
- * @date 2020/5/7 9:26
+ * @date 2020/5/8 13:47
  */
-public class ONgDBHeartBeatTest1 {
+public class ONgDBHeartBeatTest4 {
     // HTTP
     private static final String ipPorts = "pro-ongdb-1:7474|pro-ongdb-2:7474|pro-ongdb-replica-1:7474";
 
@@ -29,6 +31,8 @@ public class ONgDBHeartBeatTest1 {
 
         // 是否打印集群路由信息
         OngdbHeartBeat.IS_PRINT_CLUSTER_INFO = true;
+        // 添加驱动
+        OngdbHeartBeat.IS_ADD_BLOT_DRIVER = true;
 
         // 远程主机名与本地可访问的域名映射
         OngdbHeartBeat.setHostMap(
@@ -66,4 +70,3 @@ public class ONgDBHeartBeatTest1 {
         }
     }
 }
-
