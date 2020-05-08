@@ -1,5 +1,16 @@
 # ONgDB-LAB-HTTP
 # TRANSACTION HTTP API [RECOMMENDED USE]
+- Cluster manage
+```
+http://pro-ongdb-1:7474/db/manage
+http://pro-ongdb-1:7474/db/manage/server/console
+http://pro-ongdb-1:7474/db/manage/server/jmx
+http://pro-ongdb-1:7474/db/manage/server/jmx/kernelquery
+http://pro-ongdb-1:7474/db/manage/server/jmx/query
+http://pro-ongdb-1:7474/db/manage/server/jmx/domain/{domain}
+http://pro-ongdb-1:7474/db/manage/server/jmx/domain
+http://pro-ongdb-1:7474/db/manage/server/jmx/domain/{domain}/{objectName}
+```
 - Root discovery
 ```
 GET http://localhost:7474/

@@ -71,9 +71,10 @@ public class OngdbHeartBeat {
     private final String[] servers;
 
     /**
-     * 延时执行-单位秒-每隔几秒检测一次
-     * ROLE MAP分类运行延时参数
-     * 健康检查以及节点角色检查延时参数
+     * 执行一次节点列表ROLE MAP分类-单位秒-每隔几秒检测一次
+     * 节点角色监控
+     * 检查节点负载情况
+     * 移除无效状态的DB SERVER
      **/
     private final long delay;
 
@@ -88,6 +89,9 @@ public class OngdbHeartBeat {
     public static boolean IS_PRINT_CLUSTER_INFO = false;
 
     public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword, int delay) {
+        if (HOST_MAP.isEmpty()) {
+            throw new IllegalArgumentException();
+        }
         this.servers = Objects.requireNonNull(ipPorts).split(Symbol.SPLIT_CHARACTER.getSymbolValue());
         this.delay = delay;
 
@@ -312,7 +316,7 @@ public class OngdbHeartBeat {
                     }
                 } catch (Exception e) {
                     LOGGER.error("Valid check fail:" + server.toString() + e);
-//                    server.setStatus(false);
+                    server.setStatus(false);
                 }
             }
         }
@@ -373,7 +377,7 @@ public class OngdbHeartBeat {
                     putRoleMapList(id, addresses, role, groups, database);
                 }
             } catch (Exception e) {
-                LOGGER.error("Node connect refused:" + ipPort);
+                LOGGER.error("All node connect refused:" + ipPort);
             }
         }
         if (IS_PRINT_CLUSTER_INFO) {
