@@ -31,7 +31,7 @@ public class ONgDBHeartBeatTest4 {
 
         // 是否打印集群路由信息
         OngdbHeartBeat.IS_PRINT_CLUSTER_INFO = true;
-        // 添加驱动
+        // 添加BLOT驱动
         OngdbHeartBeat.IS_ADD_BLOT_DRIVER = true;
 
         // 远程主机名与本地可访问的域名映射
@@ -50,18 +50,28 @@ public class ONgDBHeartBeatTest4 {
             // 返回远程主机
             System.out.println("获取REMOTE READER HTTP:" + heartBeat.getReaderHttp());
             System.out.println("获取REMOTE READER BLOT:" + heartBeat.getReaderBlot());
+            System.out.println("获取REMOTE READER BLOT DRIVER:" + heartBeat.getReaderBlotDriver());
+
             // 返回本地映射主机
             System.out.println("获取LOCALHOST ACCESS READER HTTP:" + heartBeat.getReaderHttpMappingLocal());
             System.out.println("获取LOCALHOST ACCESS READER BLOT:" + heartBeat.getReaderBlotMappingLocal());
+            System.out.println("获取LOCALHOST ACCESS READER BLOT DRIVER:" + heartBeat.getReaderBlotMappingLocalDriver());
 
             // ===================================WRITE NODE=====================================
             System.out.println("获取WRITER:" + heartBeat.getWriter());
             // 返回远程主机
             System.out.println("获取REMOTE WRITER HTTP:" + heartBeat.getWriterHttp());
             System.out.println("获取REMOTE WRITER BLOT:" + heartBeat.getWriterBlot());
+            System.out.println("获取REMOTE WRITER BLOT DRIVER:" + heartBeat.getWriterBlotDriver());
+
             // 返回本地映射主机
             System.out.println("获取LOCALHOST ACCESS REMOTE WRITER HTTP:" + heartBeat.getWriterHttpMappingLocal());
             System.out.println("获取LOCALHOST ACCESS REMOTE WRITER BLOT:" + heartBeat.getWriterBlotMappingLocal());
+            System.out.println("获取LOCALHOST ACCESS REMOTE WRITER BLOT DRIVER:" + heartBeat.getWriterBlotMappingLocalDriver());
+
+            // 关闭DRIVER
+//            OngdbHeartBeat.closeDriver();
+//            OngdbHeartBeat.closeDriverAsync();
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {

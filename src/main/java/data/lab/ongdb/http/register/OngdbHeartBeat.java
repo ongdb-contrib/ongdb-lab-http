@@ -92,7 +92,7 @@ public class OngdbHeartBeat {
     public static boolean IS_PRINT_CLUSTER_INFO = false;
 
     /**
-     * 是否添加BLOT驱动
+     * 是否自动添加BLOT驱动
      **/
     public static boolean IS_ADD_BLOT_DRIVER = false;
 
@@ -158,20 +158,64 @@ public class OngdbHeartBeat {
         for (List<DbServer> dbServerList : dbServerCollection) {
             for (DbServer server : dbServerList) {
                 Address address = getHttpAddress(server.getAddressList());
-                // 本地映射
-                String serverAddressMappingLocal = address.getServerAddressMappingLocal();
                 // 不存在驱动则添加
                 if (server.getDriverServerAddressMappingLocal() == null) {
-                    Driver driverServerAddressMappingLocal = GraphDatabase.driver(AccessPrefix.SINGLE_NODE + serverAddressMappingLocal, AuthTokens.basic(authAccount, authPassword));
-                    server.setDriverServerAddressMappingLocal(driverServerAddressMappingLocal);
+                    try {
+                        // 本地映射
+                        String serverAddressMappingLocal = address.getServerAddressMappingLocal();
+                        Driver driverServerAddressMappingLocal = GraphDatabase.driver(AccessPrefix.SINGLE_NODE.getSymbol() + serverAddressMappingLocal, AuthTokens.basic(authAccount, authPassword));
+                        server.setDriverServerAddressMappingLocal(driverServerAddressMappingLocal);
+                    } catch (Exception e) {
+                        LOGGER.error("Add driver mapping local error!");
+                    }
                 }
-                // 远程主机名
-                String serverAddress = address.getServerAddress();
                 // 不存在驱动则添加
                 if (server.getDriverServerAddress() == null) {
-                    Driver driverServerAddress = GraphDatabase.driver(AccessPrefix.SINGLE_NODE + serverAddressMappingLocal, AuthTokens.basic(authAccount, authPassword));
-                    server.setDriverServerAddress(driverServerAddress);
+                    try {
+                        // 远程主机名
+                        String serverAddress = address.getServerAddress();
+                        Driver driverServerAddress = GraphDatabase.driver(AccessPrefix.SINGLE_NODE.getSymbol() + serverAddress, AuthTokens.basic(authAccount, authPassword));
+                        server.setDriverServerAddress(driverServerAddress);
+                    } catch (Exception e) {
+                        LOGGER.error("Add remote driver error!");
+                    }
                 }
+            }
+        }
+    }
+
+    /**
+     * @param
+     * @return
+     * @Description: TODO(关闭DRIVER)
+     */
+    public static void closeDriver() {
+        IS_ADD_BLOT_DRIVER = false;
+        Collection<CopyOnWriteArrayList<DbServer>> dbServerCollection = ROLE_LIST_MAP.values();
+        for (List<DbServer> dbServerList : dbServerCollection) {
+            for (DbServer server : dbServerList) {
+                server.getDriverServerAddress().close();
+                server.getDriverServerAddressMappingLocal().close();
+                server.setDriverServerAddress(null);
+                server.setDriverServerAddressMappingLocal(null);
+            }
+        }
+    }
+
+    /**
+     * @param
+     * @return
+     * @Description: TODO(关闭DRIVER)
+     */
+    public static void closeDriverAsync() {
+        IS_ADD_BLOT_DRIVER = false;
+        Collection<CopyOnWriteArrayList<DbServer>> dbServerCollection = ROLE_LIST_MAP.values();
+        for (List<DbServer> dbServerList : dbServerCollection) {
+            for (DbServer server : dbServerList) {
+                server.getDriverServerAddress().closeAsync();
+                server.getDriverServerAddressMappingLocal().closeAsync();
+                server.setDriverServerAddress(null);
+                server.setDriverServerAddressMappingLocal(null);
             }
         }
     }
@@ -643,6 +687,22 @@ public class OngdbHeartBeat {
      */
     public Map<Role, CopyOnWriteArrayList<DbServer>> getRoleListMap() {
         return ROLE_LIST_MAP;
+    }
+
+    public Driver getReaderBlotDriver() {
+        return getReader() != null ? getReader().getDriverServerAddress() : null;
+    }
+
+    public Driver getReaderBlotMappingLocalDriver() {
+        return getReader() != null ? getReader().getDriverServerAddressMappingLocal() : null;
+    }
+
+    public Driver getWriterBlotDriver() {
+        return getWriter() != null ? getWriter().getDriverServerAddress() : null;
+    }
+
+    public Driver getWriterBlotMappingLocalDriver() {
+        return getWriter() != null ? getWriter().getDriverServerAddressMappingLocal() : null;
     }
 }
 
