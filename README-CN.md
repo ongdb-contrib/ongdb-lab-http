@@ -19,8 +19,9 @@
 - 2.https://neo4j.com/docs/#http-api-transactional
 - 3.https://neo4j.com/docs/rest-docs/current/
 - 4.注册节点地址
-- 5.自动发现隐藏地址
-- 6.获取角色：READ和WRITE
-- 7.检查节点负载
-- 8.分发请求
+- 5.节点发现
+- 6.读写分离
+- 7.负载均衡
+- 8.自动路由
 - 9.主机名域名映射配置
+

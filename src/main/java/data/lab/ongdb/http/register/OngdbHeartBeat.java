@@ -166,7 +166,7 @@ public class OngdbHeartBeat {
                         Driver driverServerAddressMappingLocal = GraphDatabase.driver(AccessPrefix.SINGLE_NODE.getSymbol() + serverAddressMappingLocal, AuthTokens.basic(authAccount, authPassword));
                         server.setDriverServerAddressMappingLocal(driverServerAddressMappingLocal);
                     } catch (Exception e) {
-                        LOGGER.error("Add driver mapping local error!");
+                        LOGGER.error("Add driver mapping local error!" + e);
                     }
                 }
                 // 不存在驱动则添加
@@ -592,7 +592,8 @@ public class OngdbHeartBeat {
     }
 
     public String getReaderHttp() {
-        return getReader() != null ? getReader().getAddressList()
+        DbServer dbServer = getReader();
+        return dbServer != null ? dbServer.getAddressList()
                 .stream()
                 .filter(v -> Protocol.HTTP.equals(v.getProtocol()))
                 .collect(Collectors.toList())
@@ -600,7 +601,8 @@ public class OngdbHeartBeat {
     }
 
     public String getReaderBlot() {
-        return getReader() != null ? getReader().getAddressList()
+        DbServer dbServer = getReader();
+        return dbServer != null ? dbServer.getAddressList()
                 .stream()
                 .filter(v -> Protocol.BLOT.equals(v.getProtocol()))
                 .collect(Collectors.toList())
@@ -608,7 +610,8 @@ public class OngdbHeartBeat {
     }
 
     public String getReaderHttpMappingLocal() {
-        return getReader() != null ? getReader().getAddressList()
+        DbServer dbServer = getReader();
+        return dbServer != null ? dbServer.getAddressList()
                 .stream()
                 .filter(v -> Protocol.HTTP.equals(v.getProtocol()))
                 .collect(Collectors.toList())
@@ -616,7 +619,8 @@ public class OngdbHeartBeat {
     }
 
     public String getReaderBlotMappingLocal() {
-        return getReader() != null ? getReader().getAddressList()
+        DbServer dbServer = getReader();
+        return dbServer != null ? dbServer.getAddressList()
                 .stream()
                 .filter(v -> Protocol.BLOT.equals(v.getProtocol()))
                 .collect(Collectors.toList())
@@ -640,7 +644,8 @@ public class OngdbHeartBeat {
     }
 
     public String getWriterHttp() {
-        return getWriter() != null ? getWriter().getAddressList()
+        DbServer dbServer = getWriter();
+        return dbServer != null ? dbServer.getAddressList()
                 .stream()
                 .filter(v -> Protocol.HTTP.equals(v.getProtocol()))
                 .collect(Collectors.toList())
@@ -648,7 +653,8 @@ public class OngdbHeartBeat {
     }
 
     public String getWriterBlot() {
-        return getWriter() != null ? getWriter().getAddressList()
+        DbServer dbServer = getWriter();
+        return dbServer != null ? dbServer.getAddressList()
                 .stream()
                 .filter(v -> Protocol.BLOT.equals(v.getProtocol()))
                 .collect(Collectors.toList())
@@ -656,7 +662,8 @@ public class OngdbHeartBeat {
     }
 
     public String getWriterHttpMappingLocal() {
-        return getWriter() != null ? getWriter().getAddressList()
+        DbServer dbServer = getWriter();
+        return dbServer != null ? dbServer.getAddressList()
                 .stream()
                 .filter(v -> Protocol.HTTP.equals(v.getProtocol()))
                 .collect(Collectors.toList())
@@ -664,7 +671,8 @@ public class OngdbHeartBeat {
     }
 
     public String getWriterBlotMappingLocal() {
-        return getWriter() != null ? getWriter().getAddressList()
+        DbServer dbServer = getWriter();
+        return dbServer != null ? dbServer.getAddressList()
                 .stream()
                 .filter(v -> Protocol.BLOT.equals(v.getProtocol()))
                 .collect(Collectors.toList())
@@ -690,19 +698,23 @@ public class OngdbHeartBeat {
     }
 
     public Driver getReaderBlotDriver() {
-        return getReader() != null ? getReader().getDriverServerAddress() : null;
+        DbServer dbServer = getReader();
+        return dbServer != null ? dbServer.getDriverServerAddress() : null;
     }
 
     public Driver getReaderBlotMappingLocalDriver() {
-        return getReader() != null ? getReader().getDriverServerAddressMappingLocal() : null;
+        DbServer dbServer = getReader();
+        return dbServer != null ? dbServer.getDriverServerAddressMappingLocal() : null;
     }
 
     public Driver getWriterBlotDriver() {
-        return getWriter() != null ? getWriter().getDriverServerAddress() : null;
+        DbServer dbServer = getWriter();
+        return dbServer != null ? dbServer.getDriverServerAddress() : null;
     }
 
     public Driver getWriterBlotMappingLocalDriver() {
-        return getWriter() != null ? getWriter().getDriverServerAddressMappingLocal() : null;
+        DbServer dbServer = getWriter();
+        return dbServer != null ? dbServer.getDriverServerAddressMappingLocal() : null;
     }
 }
 
