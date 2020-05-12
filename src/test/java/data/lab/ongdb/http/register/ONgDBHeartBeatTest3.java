@@ -18,8 +18,8 @@ import java.io.File;
  * @date 2020/5/7 18:34
  */
 public class ONgDBHeartBeatTest3 {
-    // HTTP
-    private static final String ipPorts = "dev-ongdb-1:7574";
+    // HTTP DEV
+    private static final String ipPorts = "ongdb-1:7574";
 
     // 单节点
     public static void main(String[] args) {
@@ -30,7 +30,7 @@ public class ONgDBHeartBeatTest3 {
         OngdbHeartBeat.IS_PRINT_CLUSTER_INFO = true;
         // 远程主机名与本地可访问的域名映射
         OngdbHeartBeat.setHostMap(
-                "ongdb-1", "dev-ongdb-1");
+                "ongdb-1", "ongdb-1");
 
 //        OngdbHeartBeat.setHostMap(
 //                "ongdb-1", "10.20.0.157");
@@ -39,8 +39,8 @@ public class ONgDBHeartBeatTest3 {
         OngdbHeartBeat heartBeat = new OngdbHeartBeat(ipPorts, "neo4j", "datalab%dev", 5);
 
         // KILL 节点持续获取连接
-        for (; ; ) {
-            System.out.println("IS REGISTER?:" + heartBeat.isRegister());
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("IS REGISTER?:" + OngdbHeartBeat.isRegister());
             System.out.println("获取READER:" + heartBeat.getReader());
             // ===================================READ NODE=====================================
             // 返回远程主机
@@ -64,5 +64,8 @@ public class ONgDBHeartBeatTest3 {
                 e.printStackTrace();
             }
         }
+        // 关闭DRIVER
+        OngdbHeartBeat.closeDriver();
+        OngdbHeartBeat.closeDriverAsync();
     }
 }

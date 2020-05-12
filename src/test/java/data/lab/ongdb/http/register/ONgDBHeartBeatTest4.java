@@ -22,7 +22,7 @@ import static org.junit.Assert.*;
  */
 public class ONgDBHeartBeatTest4 {
     // HTTP
-    private static final String ipPorts = "pro-ongdb-1:7474|pro-ongdb-2:7474|pro-ongdb-replica-1:7474";
+    private static final String ipPorts = "ongdb-1:7474|ongdb-2:7474|ongdb-replica-1:7474";
 
     // 集群
     public static void main(String[] args) {
@@ -36,15 +36,15 @@ public class ONgDBHeartBeatTest4 {
 
         // 远程主机名与本地可访问的域名映射
         OngdbHeartBeat.setHostMap(
-                "ongdb-1", "pro-ongdb-1",
-                "ongdb-2", "pro-ongdb-2",
-                "ongdb-replica-1", "pro-ongdb-replica-1");
+                "ongdb-1", "ongdb-1",
+                "ongdb-2", "ongdb-2",
+                "ongdb-replica-1", "ongdb-replica-1");
 
         OngdbHeartBeat heartBeat = new OngdbHeartBeat(ipPorts, "neo4j", "datalab%pro", 5);
 
         // KILL 节点持续获取连接
-        for (; ; ) {
-            System.out.println("IS REGISTER?:" + heartBeat.isRegister());
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("IS REGISTER?:" + OngdbHeartBeat.isRegister());
             System.out.println("获取READER:" + heartBeat.getReader());
             // ===================================READ NODE=====================================
             // 返回远程主机
@@ -69,14 +69,14 @@ public class ONgDBHeartBeatTest4 {
             System.out.println("获取LOCALHOST ACCESS REMOTE WRITER BLOT:" + heartBeat.getWriterBlotMappingLocal());
             System.out.println("获取LOCALHOST ACCESS REMOTE WRITER BLOT DRIVER:" + heartBeat.getWriterBlotMappingLocalDriver());
 
-            // 关闭DRIVER
-//            OngdbHeartBeat.closeDriver();
-//            OngdbHeartBeat.closeDriverAsync();
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        // 关闭DRIVER
+        OngdbHeartBeat.closeDriver();
+        OngdbHeartBeat.closeDriverAsync();
     }
 }

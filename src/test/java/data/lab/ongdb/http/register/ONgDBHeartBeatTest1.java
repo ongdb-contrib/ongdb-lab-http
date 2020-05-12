@@ -39,8 +39,8 @@ public class ONgDBHeartBeatTest1 {
         OngdbHeartBeat heartBeat = new OngdbHeartBeat(ipPorts, "neo4j", "datalab%pro", 5);
 
         // KILL 节点持续获取连接
-        for (; ; ) {
-            System.out.println("IS REGISTER?:" + heartBeat.isRegister());
+        for (int i = 0; i < 1000; i++) {
+            System.out.println("IS REGISTER?:" + OngdbHeartBeat.isRegister());
             System.out.println("获取READER:" + heartBeat.getReader());
             // ===================================READ NODE=====================================
             // 返回远程主机
@@ -64,6 +64,9 @@ public class ONgDBHeartBeatTest1 {
                 e.printStackTrace();
             }
         }
+        // 关闭DRIVER
+        OngdbHeartBeat.closeDriver();
+        OngdbHeartBeat.closeDriverAsync();
     }
 }
 

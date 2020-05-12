@@ -19,8 +19,10 @@ import data.lab.ongdb.http.extra.HttpRequest;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.neo4j.driver.AuthTokens;
+import org.neo4j.driver.Config;
 import org.neo4j.driver.Driver;
 import org.neo4j.driver.GraphDatabase;
+import org.neo4j.driver.net.ServerAddress;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -63,8 +65,8 @@ public class OngdbHeartBeat {
     /**
      * http访问对象 支持绝对接口地址和相对接口地址
      **/
-    public HttpProxyRequest request;
-    public HttpRequest originalRequest;
+    public static HttpProxyRequest request;
+    public static HttpRequest originalRequest;
 
     /**
      * 默认未注册心跳检测机制
@@ -100,7 +102,20 @@ public class OngdbHeartBeat {
 
     private final String authPassword;
 
+    /**
+     * 默认的事务超时时间设置
+     **/
+    private static int withMaxTransactionRetryTime = 600;
+
+    /**
+     * 全局ROUTING DRIVER
+     **/
+    private static Driver routingDriverServer;
+
     public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword, int delay) {
+
+        this.servers = Objects.requireNonNull(ipPorts).split(Symbol.SPLIT_CHARACTER.getSymbolValue());
+
         if (HOST_MAP.isEmpty()) {
             throw new IllegalArgumentException();
         }
@@ -109,17 +124,19 @@ public class OngdbHeartBeat {
         this.authAccount = authAccount;
         this.authPassword = authPassword;
 
-        this.servers = Objects.requireNonNull(ipPorts).split(Symbol.SPLIT_CHARACTER.getSymbolValue());
         this.delay = delay;
 
         HttpProxyRegister.register(getIpPortsStr(ipPorts), authAccount, authPassword);
-        this.request = new HttpProxyRequest(HttpPoolSym.DEFAULT.getSymbolValue(), authAccount, authPassword);
-        this.originalRequest = new HttpRequest(authAccount, authPassword);
+        request = new HttpProxyRequest(HttpPoolSym.DEFAULT.getSymbolValue(), authAccount, authPassword);
+        originalRequest = new HttpRequest(authAccount, authPassword);
 
         // 多节点运行监控线程
         if (HOST_MAP.size() > 1) {
             // 初始化运行
             initRun();
+
+            // 添加BLOT驱动
+            addGraphJavaDriver();
 
             // 线程池运行
             threadPoolRun();
@@ -127,6 +144,37 @@ public class OngdbHeartBeat {
             // 单节点不运行监控线程
             packDefaultHost();
         }
+    }
+
+    private void addGraphJavaDriver() {
+        if (IS_ADD_BLOT_DRIVER) {
+            // 自动路由驱动
+            if (isIpAddress()) {
+                LOGGER.info("ADD multi node blot routing driver...");
+                addRoutingBlotDriver();
+            } else {
+                // 单点连接驱动
+                LOGGER.info("ADD single node blot driver...");
+                addBlotDriver();
+            }
+        }
+    }
+
+    private boolean isIpAddress() {
+        int length = this.servers.length;
+        for (int i = 0; i < length; i++) {
+            if (i == length - 1) {
+                return isIp(this.servers[i]);
+            } else if (!isIp(this.servers[i])) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private boolean isIp(String host) {
+        String[] array = host.split(Symbol.POINT.getSymbolValue());
+        return array.length == 4;
     }
 
     private void initRun() {
@@ -141,11 +189,67 @@ public class OngdbHeartBeat {
 
         // 移除无效状态的DB SERVER
         removeNotValid();
+    }
 
-        // 添加BLOT驱动
-        if (IS_ADD_BLOT_DRIVER) {
-            addBlotDriver();
+    private void addRoutingBlotDriver() {
+        Collection<CopyOnWriteArrayList<DbServer>> dbServerCollection = ROLE_LIST_MAP.values();
+
+        List<ServerAddress> addresses = getServerAddress();
+        String virtualUri = addresses.get(0).host();
+        try {
+            for (List<DbServer> dbServerList : dbServerCollection) {
+                for (DbServer server : dbServerList) {
+                    // 不存在驱动则添加
+                    if (server.getRoutingDriverServerAddress() == null) {
+                        if (routingDriverServer == null) {
+                            routingDriverServer = createDriverCluster(AccessPrefix.SINGLE_NODE.getSymbol() + virtualUri, authAccount, authPassword, addresses);
+                        }
+                        server.setRoutingDriverServerAddress(routingDriverServer);
+                        server.setDriverServerAddressMappingLocal(routingDriverServer);
+                        server.setDriverServerAddress(routingDriverServer);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Add routing driver error!" + e);
         }
+    }
+
+    private List<ServerAddress> getServerAddress() {
+        List<ServerAddress> addresses = new ArrayList<>();
+        Collection<CopyOnWriteArrayList<DbServer>> dbServerCollection = ROLE_LIST_MAP.values();
+        for (List<DbServer> dbServerList : dbServerCollection) {
+            for (DbServer server : dbServerList) {
+                List<Address> addressList = server.getAddressList();
+                for (Address address : addressList) {
+                    if (Protocol.BLOT.equals(address.getProtocol()) &&
+                            !addresses.contains(ServerAddress.of(address.getInitHost(), address.getPort()))) {
+                        addresses.add(ServerAddress.of(address.getInitHost(), address.getPort()));
+                    }
+                }
+            }
+        }
+        return addresses;
+    }
+
+    private Driver createDriverCluster(String virtualUri, String user, String password, ServerAddress... addresses) {
+        Config config = Config.builder()
+                // 多种子连接配置
+                .withResolver(address -> new HashSet<>(Arrays.asList(addresses)))
+                // 事务超时时间设置
+                .withMaxTransactionRetryTime(withMaxTransactionRetryTime, TimeUnit.SECONDS)
+                .build();
+        return (GraphDatabase.driver(virtualUri, AuthTokens.basic(user, password), config));
+    }
+
+    private Driver createDriverCluster(String virtualUri, String user, String password, List<ServerAddress> addresses) {
+        Config config = Config.builder()
+                // 多种子连接配置
+                .withResolver(address -> new HashSet<>(addresses))
+                // 事务超时时间设置
+                .withMaxTransactionRetryTime(withMaxTransactionRetryTime, TimeUnit.SECONDS)
+                .build();
+        return (GraphDatabase.driver(virtualUri, AuthTokens.basic(user, password), config));
     }
 
     /**
@@ -194,12 +298,26 @@ public class OngdbHeartBeat {
         Collection<CopyOnWriteArrayList<DbServer>> dbServerCollection = ROLE_LIST_MAP.values();
         for (List<DbServer> dbServerList : dbServerCollection) {
             for (DbServer server : dbServerList) {
-                server.getDriverServerAddress().close();
-                server.getDriverServerAddressMappingLocal().close();
-                server.setDriverServerAddress(null);
+                if (server.getDriverServerAddress() != null) {
+                    server.getDriverServerAddress().close();
+                }
+                if (server.getDriverServerAddressMappingLocal() != null) {
+                    server.getDriverServerAddressMappingLocal().close();
+                }
+                if (server.getRoutingDriverServerAddress() != null) {
+                    server.getRoutingDriverServerAddress().close();
+                }
                 server.setDriverServerAddressMappingLocal(null);
+                server.setRoutingDriverServerAddress(null);
             }
         }
+        closeHttp();
+    }
+
+    private static void closeHttp() {
+        LOGGER.info("Close http and java driver!");
+        request = null;
+        originalRequest = null;
     }
 
     /**
@@ -212,12 +330,21 @@ public class OngdbHeartBeat {
         Collection<CopyOnWriteArrayList<DbServer>> dbServerCollection = ROLE_LIST_MAP.values();
         for (List<DbServer> dbServerList : dbServerCollection) {
             for (DbServer server : dbServerList) {
-                server.getDriverServerAddress().closeAsync();
-                server.getDriverServerAddressMappingLocal().closeAsync();
+                if (server.getDriverServerAddress() != null) {
+                    server.getDriverServerAddress().closeAsync();
+                }
+                if (server.getDriverServerAddressMappingLocal() != null) {
+                    server.getDriverServerAddressMappingLocal().closeAsync();
+                }
+                if (server.getRoutingDriverServerAddress() != null) {
+                    server.getRoutingDriverServerAddress().closeAsync();
+                }
                 server.setDriverServerAddress(null);
                 server.setDriverServerAddressMappingLocal(null);
+                server.setRoutingDriverServerAddress(null);
             }
         }
+        closeHttp();
     }
 
     private static Address getHttpAddress(List<Address> addressList) {
@@ -244,7 +371,7 @@ public class OngdbHeartBeat {
                 this::removeNotValid, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
         if (IS_ADD_BLOT_DRIVER) {
             Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
-                    this::addBlotDriver, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
+                    this::addGraphJavaDriver, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
         }
         LOGGER.info("ONgDB heartbeat detection run... " + "ongdb.heartbeat.detection.interval:" + this.delay + "s");
     }
@@ -476,7 +603,7 @@ public class OngdbHeartBeat {
             Condition condition = new Condition();
             condition.setStatement(CLUSTER_OVERVIEW_CYPHER, ResultDataContents.ROW);
             try {
-                String clusterViewStr = this.request.httpPost("/" + NeoUrl.DB_DATA_TRANSACTION_COMMIT.getSymbolValue(), condition.toString());
+                String clusterViewStr = request.httpPost("/" + NeoUrl.DB_DATA_TRANSACTION_COMMIT.getSymbolValue(), condition.toString());
 
                 JSONObject object = JSONObject.parseObject(clusterViewStr);
 

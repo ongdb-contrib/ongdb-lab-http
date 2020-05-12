@@ -44,6 +44,11 @@ public class DbServer {
      **/
     private Driver driverServerAddress;
 
+    /**
+     * BLOT驱动器-ROUTING
+     **/
+    private Driver routingDriverServerAddress;
+
     public DbServer(String id, List<Address> addressList, Role role, JSONArray groups, String database, boolean status) {
         this.id = id;
         this.addressList = addressList;
@@ -135,6 +140,14 @@ public class DbServer {
 
     public void setDatabase(String database) {
         this.database = database;
+    }
+
+    public Driver getRoutingDriverServerAddress() {
+        return routingDriverServerAddress;
+    }
+
+    public void setRoutingDriverServerAddress(Driver routingDriverServerAddress) {
+        this.routingDriverServerAddress = routingDriverServerAddress;
     }
 
     @Override
