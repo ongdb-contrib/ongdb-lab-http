@@ -143,6 +143,9 @@ public class OngdbHeartBeat {
         } else {
             // 单节点不运行监控线程
             packDefaultHost();
+            // 单点连接驱动
+            LOGGER.info("ADD single node blot driver...");
+            addBlotDriver();
         }
     }
 
@@ -395,7 +398,7 @@ public class OngdbHeartBeat {
         Condition condition = new Condition();
         condition.setStatement(SINGLE_NODE_CONF, ResultDataContents.ROW);
         try {
-            String singleNodeConf = this.request.httpPost("/" + NeoUrl.DB_DATA_TRANSACTION_COMMIT.getSymbolValue(), condition.toString());
+            String singleNodeConf = request.httpPost("/" + NeoUrl.DB_DATA_TRANSACTION_COMMIT.getSymbolValue(), condition.toString());
             JSONObject object = JSONObject.parseObject(singleNodeConf);
             JSONArray dataObj = object.getJSONArray("results").getJSONObject(0).getJSONArray("data");
 
