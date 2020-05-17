@@ -16,6 +16,7 @@ import data.lab.ongdb.http.extra.HttpPoolSym;
 import data.lab.ongdb.http.extra.HttpProxyRegister;
 import data.lab.ongdb.http.extra.HttpProxyRequest;
 import data.lab.ongdb.http.extra.HttpRequest;
+import data.lab.ongdb.http.util.TelnetUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.neo4j.driver.AuthTokens;
@@ -73,15 +74,25 @@ public class OngdbHeartBeat {
      **/
     private static boolean IS_REGISTER = false;
 
-    private final String[] servers;
+    private String[] servers;
 
     /**
-     * 执行一次节点列表ROLE MAP分类-单位秒-每隔几秒检测一次
+     * 执行一次节点列表ROLE MAP分类-单位秒-每隔几秒检测一次 - 默认5秒检测一次
      * 节点角色监控
      * 检查节点负载情况
      * 移除无效状态的DB SERVER
      **/
-    private final long delay;
+    private int DELAY = 5;
+
+    /**
+     * 心跳检测默认每3秒执行一次
+     **/
+    private int HEART_HEALTH = 3;
+
+    /**
+     * 心跳检测超时时间，默认10秒
+     **/
+    private int TIME_OUT = 10;
 
     /**
      * 监控线程初始执行延迟设置
@@ -98,21 +109,48 @@ public class OngdbHeartBeat {
      **/
     public static boolean IS_ADD_BLOT_DRIVER = false;
 
-    private final String authAccount;
+    private String authAccount;
 
-    private final String authPassword;
+    private String authPassword;
 
     /**
-     * 默认的事务超时时间设置
+     * 默认的事务超时时间设置10分钟
      **/
-    private static int withMaxTransactionRetryTime = 600;
+    private int withMaxTransactionRetryTime = 600;
 
     /**
      * 全局ROUTING DRIVER
      **/
     private static Driver routingDriverServer;
 
+    public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword) {
+        new OngdbHeartBeat(ipPorts, authAccount, authPassword, this.DELAY);
+    }
+
     public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword, int delay) {
+        new OngdbHeartBeat(ipPorts, authAccount, authPassword, delay, this.withMaxTransactionRetryTime);
+    }
+
+    public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword, int delay, int withMaxTransactionRetryTime) {
+        new OngdbHeartBeat(ipPorts, authAccount, authPassword, delay, withMaxTransactionRetryTime, this.HEART_HEALTH);
+    }
+
+    public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword, int delay, int withMaxTransactionRetryTime, int heartHealthDetect) {
+        new OngdbHeartBeat(ipPorts, authAccount, authPassword, delay, withMaxTransactionRetryTime, heartHealthDetect, this.TIME_OUT);
+    }
+
+    /**
+     * @param ipPorts:'|'分隔的HOST:PORT地址
+     * @param authAccount:用户名
+     * @param authPassword:密码
+     * @param delay:监控线程运行间隔（秒）
+     * @param withMaxTransactionRetryTime:事务提交超时时间设置（秒）
+     * @param heartHealthDetect:心跳检测间隔时间（秒）
+     * @param timeOut:心跳检测超时时间（秒）
+     * @return
+     * @Description: TODO
+     */
+    public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword, int delay, int withMaxTransactionRetryTime, int heartHealthDetect, int timeOut) {
 
         this.servers = Objects.requireNonNull(ipPorts).split(Symbol.SPLIT_CHARACTER.getSymbolValue());
 
@@ -124,7 +162,10 @@ public class OngdbHeartBeat {
         this.authAccount = authAccount;
         this.authPassword = authPassword;
 
-        this.delay = delay;
+        this.DELAY = delay;
+        this.withMaxTransactionRetryTime = withMaxTransactionRetryTime;
+        this.HEART_HEALTH = heartHealthDetect;
+        this.TIME_OUT = timeOut;
 
         HttpProxyRegister.register(getIpPortsStr(ipPorts), authAccount, authPassword);
         request = new HttpProxyRequest(HttpPoolSym.DEFAULT.getSymbolValue(), authAccount, authPassword);
@@ -190,8 +231,31 @@ public class OngdbHeartBeat {
         // 检查节点负载情况
         checkTheLoad();
 
+        // 执行一次心跳检测
+        heartHealthdDetect();
+
         // 移除无效状态的DB SERVER
         removeNotValid();
+    }
+
+    /**
+     * @param
+     * @return
+     * @Description: TODO(执行心跳检测)
+     */
+    private void heartHealthdDetect() {
+        if (IS_PRINT_CLUSTER_INFO) {
+            LOGGER.info("Heart health check...");
+        }
+        Collection<CopyOnWriteArrayList<DbServer>> dbServerCollection = ROLE_LIST_MAP.values();
+        for (List<DbServer> dbServerList : dbServerCollection) {
+            for (DbServer server : dbServerList) {
+                // HTTP地址
+                Address httpAddress = getHttpAddress(server);
+                boolean isConnected = TelnetUtil.telnet(getHost(httpAddress.getHost()), httpAddress.getPort(), TIME_OUT);
+                server.setStatus(isConnected);
+            }
+        }
     }
 
     private void addRoutingBlotDriver() {
@@ -365,18 +429,20 @@ public class OngdbHeartBeat {
      */
     private void threadPoolRun() {
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
-                this::classifyNode, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
+                this::classifyNode, INITIAL_DELAY, this.DELAY, TimeUnit.SECONDS);
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
-                this::validCheck, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
+                this::validCheck, INITIAL_DELAY, this.DELAY, TimeUnit.SECONDS);
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
-                this::checkTheLoad, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
+                this::checkTheLoad, INITIAL_DELAY, this.DELAY, TimeUnit.SECONDS);
         Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
-                this::removeNotValid, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
+                this::removeNotValid, INITIAL_DELAY, this.DELAY, TimeUnit.SECONDS);
         if (IS_ADD_BLOT_DRIVER) {
             Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
-                    this::addGraphJavaDriver, INITIAL_DELAY, this.delay, TimeUnit.SECONDS);
+                    this::addGraphJavaDriver, INITIAL_DELAY, this.DELAY, TimeUnit.SECONDS);
         }
-        LOGGER.info("ONgDB heartbeat detection run... " + "ongdb.heartbeat.detection.interval:" + this.delay + "s");
+        Executors.newSingleThreadScheduledExecutor().scheduleWithFixedDelay(
+                this::removeNotValid, INITIAL_DELAY, this.HEART_HEALTH, TimeUnit.SECONDS);
+        LOGGER.info("ONgDB heartbeat detection run interval:" + this.HEART_HEALTH + "s " + "ongdb.heartbeat.detection.interval:" + this.DELAY + "s");
     }
 
     private void packDefaultHost() {
@@ -479,7 +545,7 @@ public class OngdbHeartBeat {
                 Condition condition = new Condition();
                 condition.setStatement(QUERY_COUNT, ResultDataContents.ROW);
                 try {
-                    String queryCountStr = this.originalRequest.httpPost("http://" + ipPort + "/" + NeoUrl.DB_DATA_TRANSACTION_COMMIT.getSymbolValue(), condition.toString());
+                    String queryCountStr = originalRequest.httpPost("http://" + ipPort + "/" + NeoUrl.DB_DATA_TRANSACTION_COMMIT.getSymbolValue(), condition.toString());
                     JSONObject object = JSONObject.parseObject(queryCountStr);
                     JSONArray dataObj = object.getJSONArray("results").getJSONObject(0).getJSONArray("data");
                     for (Object rowObj : dataObj) {
@@ -492,6 +558,7 @@ public class OngdbHeartBeat {
                     }
                 } catch (Exception e) {
                     LOGGER.error("Check load fail:" + server.toString() + e);
+                    e.printStackTrace();
                 }
             }
         }
@@ -553,7 +620,7 @@ public class OngdbHeartBeat {
                 Condition condition = new Condition();
                 condition.setStatement(NODE_ROLE_CYPHER, ResultDataContents.ROW);
                 try {
-                    String clusterViewStr = this.originalRequest.httpPost("http://" + ipPort + "/" + NeoUrl.DB_DATA_TRANSACTION_COMMIT.getSymbolValue(), condition.toString());
+                    String clusterViewStr = originalRequest.httpPost("http://" + ipPort + "/" + NeoUrl.DB_DATA_TRANSACTION_COMMIT.getSymbolValue(), condition.toString());
 
                     Role currentRole = getRoleFromResult(clusterViewStr);
                     if (!role.equals(currentRole)) {
@@ -561,7 +628,7 @@ public class OngdbHeartBeat {
                     }
                 } catch (Exception e) {
                     LOGGER.error("Valid check fail:" + server.toString() + e);
-                    server.setStatus(false);
+                    e.printStackTrace();
                 }
             }
         }
