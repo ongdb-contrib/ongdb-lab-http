@@ -123,6 +123,13 @@ public class OngdbHeartBeat {
      **/
     private static Driver routingDriverServer;
 
+    private static String URI_BOLT;
+
+    /**
+     * 是否运行所有监测逻辑
+     **/
+    public static boolean RUN_ALL_DETECT = true;
+
     public OngdbHeartBeat(String ipPorts, String authAccount, String authPassword) {
         new OngdbHeartBeat(ipPorts, authAccount, authPassword, this.DELAY);
     }
@@ -171,23 +178,29 @@ public class OngdbHeartBeat {
         request = new HttpProxyRequest(HttpPoolSym.DEFAULT.getSymbolValue(), authAccount, authPassword);
         originalRequest = new HttpRequest(authAccount, authPassword);
 
-        // 多节点运行监控线程
-        if (HOST_MAP.size() > 1) {
-            // 初始化运行
-            initRun();
+        if (RUN_ALL_DETECT) {
+            // 多节点运行监控线程
+            if (HOST_MAP.size() > 1) {
+                // 初始化运行
+                initRun();
 
-            // 添加BLOT驱动
-            addGraphJavaDriver();
+                // 添加BLOT驱动
+                addGraphJavaDriver();
 
-            // 线程池运行
-            threadPoolRun();
-        } else {
-            // 单节点不运行监控线程
-            packDefaultHost();
-            // 单点连接驱动
-            LOGGER.info("ADD single node blot driver...");
-            addBlotDriver();
+                // 线程池运行
+                threadPoolRun();
+            } else {
+                // 单节点不运行监控线程
+                packDefaultHost();
+                // 单点连接驱动
+                LOGGER.info("ADD single node blot driver...");
+                addBlotDriver();
+            }
         }
+    }
+
+    public static void explicitRegisterBolt(String uriBolt) {
+        URI_BOLT = uriBolt;
     }
 
     private void addGraphJavaDriver() {
@@ -222,20 +235,20 @@ public class OngdbHeartBeat {
     }
 
     private void initRun() {
-        // 执行一次节点列表ROLE MAP分类
-        classifyNode();
+            // 执行一次节点列表ROLE MAP分类
+            classifyNode();
 
-        // 节点角色监控
-        validCheck();
+            // 节点角色监控
+            validCheck();
 
-        // 检查节点负载情况
-        checkTheLoad();
+            // 检查节点负载情况
+            checkTheLoad();
 
-        // 执行一次心跳检测
-        heartHealthdDetect();
+            // 执行一次心跳检测
+            heartHealthdDetect();
 
-        // 移除无效状态的DB SERVER
-        removeNotValid();
+            // 移除无效状态的DB SERVER
+            removeNotValid();
     }
 
     /**
@@ -269,7 +282,7 @@ public class OngdbHeartBeat {
                     // 不存在驱动则添加
                     if (server.getRoutingDriverServerAddress() == null) {
                         if (routingDriverServer == null) {
-                            routingDriverServer = createDriverCluster(AccessPrefix.SINGLE_NODE.getSymbol() + virtualUri, authAccount, authPassword, addresses);
+                            routingDriverServer = createDriverCluster(AccessPrefix.MULTI_NODES.getSymbol() + virtualUri, authAccount, authPassword, addresses);
                         }
                         server.setRoutingDriverServerAddress(routingDriverServer);
                         server.setDriverServerAddressMappingLocal(routingDriverServer);
@@ -896,22 +909,54 @@ public class OngdbHeartBeat {
 
     public Driver getReaderBlotDriver() {
         DbServer dbServer = getReader();
-        return dbServer != null ? dbServer.getDriverServerAddress() : null;
+        Driver driver = dbServer != null ? dbServer.getDriverServerAddress() : null;
+        if (driver == null) {
+            driver = buildDriver();
+        }
+        return driver;
     }
 
     public Driver getReaderBlotMappingLocalDriver() {
         DbServer dbServer = getReader();
-        return dbServer != null ? dbServer.getDriverServerAddressMappingLocal() : null;
+        Driver driver = dbServer != null ? dbServer.getDriverServerAddressMappingLocal() : null;
+        if (driver == null) {
+            driver = buildDriver();
+        }
+        return driver;
     }
 
     public Driver getWriterBlotDriver() {
         DbServer dbServer = getWriter();
-        return dbServer != null ? dbServer.getDriverServerAddress() : null;
+        Driver driver = dbServer != null ? dbServer.getDriverServerAddress() : null;
+        if (driver == null) {
+            driver = buildDriver();
+        }
+        return driver;
     }
 
     public Driver getWriterBlotMappingLocalDriver() {
         DbServer dbServer = getWriter();
-        return dbServer != null ? dbServer.getDriverServerAddressMappingLocal() : null;
+        Driver driver = dbServer != null ? dbServer.getDriverServerAddressMappingLocal() : null;
+        if (driver == null) {
+            driver = buildDriver();
+        }
+        return driver;
+    }
+
+    private Driver buildDriver() {
+        String[] uriBolts = URI_BOLT.split(Symbol.SPLIT_CHARACTER.getSymbolValue());
+        if (uriBolts.length > 1) {
+            List<ServerAddress> addressList = new ArrayList<>();
+            for (String addr : uriBolts) {
+                String[] array = addr.split(Symbol.COLON.getSymbolValue());
+                String ip = array[0];
+                int host = Integer.parseInt(array[1]);
+                addressList.add(ServerAddress.of(ip, host));
+            }
+            return createDriverCluster(AccessPrefix.MULTI_NODES.getSymbol() + addressList.get(0).host(), authAccount, authPassword, addressList);
+        } else {
+            return GraphDatabase.driver(AccessPrefix.SINGLE_NODE.getSymbol() + uriBolts[0], AuthTokens.basic(authAccount, authPassword));
+        }
     }
 }
 

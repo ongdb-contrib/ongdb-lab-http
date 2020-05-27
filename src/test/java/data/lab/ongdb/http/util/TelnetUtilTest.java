@@ -17,8 +17,8 @@ import org.junit.Test;
 public class TelnetUtilTest {
     @Test
     public void telnet() {
-        String host = "ongdb-replica-1";
-        int port = 7474;
+        String host = "10.20.0.157";
+        int port = 7574;
         /**
          * 单位秒
          * **/

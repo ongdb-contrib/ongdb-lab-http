@@ -15,11 +15,14 @@ import java.io.File;
  * @author Yc-Ma
  * @PACKAGE_NAME: data.lab.ongdb.http.register
  * @Description: TODO
- * @date 2020/5/12 15:48
+ * @date 2020/5/27 14:49
  */
-public class ONgDBHeartBeatTest6 {
+public class ONgDBHeartBeatTest7 {
     // HTTP
-    private static final String ipPorts = "10.20.12.173:7474|10.20.13.146:7474|10.20.13.200:7474";
+    private static final String ipPorts = "10.20.0.157:7574";
+
+    // HTTP
+    private static final String uriBolt = "10.20.0.157:7787";
 
     // 集群
     public static void main(String[] args) throws InterruptedException {
@@ -38,10 +41,13 @@ public class ONgDBHeartBeatTest6 {
          * 3、自动注册BLOT驱动
          * **/
         OngdbHeartBeat.setHostMap(
-                "ongdb-1", "10.20.12.173",
-                "ongdb-2", "10.20.13.146",
-                "ongdb-replica-1", "10.20.13.200");
-//        OngdbHeartBeat heartBeat = new OngdbHeartBeat(ipPorts, "neo4j", "datalab%pro", 5);
+                "ongdb-1", "10.20.0.157");
+
+        OngdbHeartBeat.RUN_ALL_DETECT=false;
+        /**
+         * 显式注册bolt驱动：在HTTP不可用时此方式可靠性较高
+         * **/
+        OngdbHeartBeat.explicitRegisterBolt(uriBolt);
 
         /**
          * @param ipPorts:'|'分隔的HOST:PORT地址
@@ -54,7 +60,7 @@ public class ONgDBHeartBeatTest6 {
          * @return
          * @Description: TODO
          */
-        OngdbHeartBeat heartBeat = new OngdbHeartBeat(ipPorts, "neo4j", "datalab%pro", 10,600,5,10);
+        OngdbHeartBeat heartBeat = new OngdbHeartBeat(ipPorts, "neo4j", "datalab%pro", 10, 600, 5, 10);
 
         /**
          * HTTP AND DRIVER本地访问服务器如下使用即可
@@ -71,10 +77,9 @@ public class ONgDBHeartBeatTest6 {
         System.out.println("获取LOCALHOST ACCESS REMOTE WRITER BLOT:" + heartBeat.getWriterBlotMappingLocal());
         System.out.println("获取LOCALHOST ACCESS REMOTE WRITER BLOT DRIVER:" + heartBeat.getWriterBlotMappingLocalDriver());
 
-        Thread.sleep(1_000*60*60*24);
+        Thread.sleep(1_000 * 60 * 60 * 24);
         // 关闭DRIVER
         OngdbHeartBeat.closeDriver();
         OngdbHeartBeat.closeDriverAsync();
     }
 }
-
