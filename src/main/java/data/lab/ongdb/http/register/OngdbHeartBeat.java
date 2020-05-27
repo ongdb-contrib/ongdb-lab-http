@@ -235,20 +235,20 @@ public class OngdbHeartBeat {
     }
 
     private void initRun() {
-            // 执行一次节点列表ROLE MAP分类
-            classifyNode();
+        // 执行一次节点列表ROLE MAP分类
+        classifyNode();
 
-            // 节点角色监控
-            validCheck();
+        // 节点角色监控
+        validCheck();
 
-            // 检查节点负载情况
-            checkTheLoad();
+        // 检查节点负载情况
+        checkTheLoad();
 
-            // 执行一次心跳检测
-            heartHealthdDetect();
+        // 执行一次心跳检测
+        heartHealthdDetect();
 
-            // 移除无效状态的DB SERVER
-            removeNotValid();
+        // 移除无效状态的DB SERVER
+        removeNotValid();
     }
 
     /**
@@ -943,6 +943,9 @@ public class OngdbHeartBeat {
         return driver;
     }
 
+    private Driver singleNodeDirver;
+    private Driver multiNodeDriver;
+
     private Driver buildDriver() {
         String[] uriBolts = URI_BOLT.split(Symbol.SPLIT_CHARACTER.getSymbolValue());
         if (uriBolts.length > 1) {
@@ -953,9 +956,20 @@ public class OngdbHeartBeat {
                 int host = Integer.parseInt(array[1]);
                 addressList.add(ServerAddress.of(ip, host));
             }
-            return createDriverCluster(AccessPrefix.MULTI_NODES.getSymbol() + addressList.get(0).host(), authAccount, authPassword, addressList);
+            if (this.multiNodeDriver != null) {
+                return this.multiNodeDriver;
+            } else {
+                this.multiNodeDriver = createDriverCluster(AccessPrefix.MULTI_NODES.getSymbol() + addressList.get(0).host(), authAccount, authPassword, addressList);
+                return this.multiNodeDriver;
+            }
+
         } else {
-            return GraphDatabase.driver(AccessPrefix.SINGLE_NODE.getSymbol() + uriBolts[0], AuthTokens.basic(authAccount, authPassword));
+            if (this.singleNodeDirver != null) {
+                return this.singleNodeDirver;
+            } else {
+                this.singleNodeDirver = GraphDatabase.driver(AccessPrefix.SINGLE_NODE.getSymbol() + uriBolts[0], AuthTokens.basic(authAccount, authPassword));
+                return this.singleNodeDirver;
+            }
         }
     }
 }
