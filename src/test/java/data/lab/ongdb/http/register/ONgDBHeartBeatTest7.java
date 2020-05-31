@@ -8,6 +8,8 @@ package data.lab.ongdb.http.register;
 import org.apache.log4j.PropertyConfigurator;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.neo4j.driver.Driver;
+import org.neo4j.driver.Session;
 
 import java.io.File;
 
@@ -43,7 +45,7 @@ public class ONgDBHeartBeatTest7 {
         OngdbHeartBeat.setHostMap(
                 "ongdb-1", "10.20.0.157");
 
-        OngdbHeartBeat.RUN_ALL_DETECT=false;
+        OngdbHeartBeat.RUN_ALL_DETECT = false;
         /**
          * 显式注册bolt驱动：在HTTP不可用时此方式可靠性较高
          * **/
@@ -60,7 +62,7 @@ public class ONgDBHeartBeatTest7 {
          * @return
          * @Description: TODO
          */
-        OngdbHeartBeat heartBeat = new OngdbHeartBeat(ipPorts, "neo4j", "datalab%pro", 10, 600, 5, 10);
+        OngdbHeartBeat heartBeat = new OngdbHeartBeat(ipPorts, "neo4j", "datalab%dev", 10, 600, 5, 10);
 
         /**
          * HTTP AND DRIVER本地访问服务器如下使用即可
@@ -76,6 +78,11 @@ public class ONgDBHeartBeatTest7 {
         System.out.println("获取LOCALHOST ACCESS REMOTE WRITER HTTP:" + heartBeat.getWriterHttpMappingLocal());
         System.out.println("获取LOCALHOST ACCESS REMOTE WRITER BLOT:" + heartBeat.getWriterBlotMappingLocal());
         System.out.println("获取LOCALHOST ACCESS REMOTE WRITER BLOT DRIVER:" + heartBeat.getWriterBlotMappingLocalDriver());
+
+        // 写数据
+        Driver driver = heartBeat.getWriterBlotMappingLocalDriver();
+        Session session = driver.session();
+        session.run("MERGE (n:`PRE公司中文名称` {name:'test'})");
 
         Thread.sleep(1_000 * 60 * 60 * 24);
         // 关闭DRIVER
