@@ -105,7 +105,7 @@ public class OngdbHeartBeat {
     public static boolean IS_PRINT_CLUSTER_INFO = false;
 
     /**
-     * 是否自动添加BLOT驱动
+     * 是否自动添加BLOT驱动【此配置只针对WRITER节点，对REPLICA节点不生效】
      **/
     public static boolean IS_ADD_BLOT_DRIVER = false;
 
