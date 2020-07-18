@@ -62,6 +62,10 @@ public class HttpServiceHosts {
         return healthCheckStarted;
     }
 
+    public List<HttpAddress> getAddressList() {
+        return addressList;
+    }
+
     public HttpAddress getHttpAddress() {
         HttpAddress httpAddress = null;
         if (!hasRouting) {
