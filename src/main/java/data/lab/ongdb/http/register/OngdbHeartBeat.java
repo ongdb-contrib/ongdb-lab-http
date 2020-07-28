@@ -109,6 +109,11 @@ public class OngdbHeartBeat {
      **/
     public static boolean IS_ADD_BLOT_DRIVER = false;
 
+    /**
+     * 优先返回只读节点
+     **/
+    public static boolean isReaderPriority = true;
+
     private String authAccount;
 
     private String authPassword;
@@ -791,14 +796,34 @@ public class OngdbHeartBeat {
             serverReadReplicaList.addAll(serverFollowerList);
             serverReadReplicaList.addAll(serverLeaderList);
             // 根据QUERY_COUNT倒排列表
-            List<DbServer> dbServerList = serverReadReplicaList.stream()
-                    .sorted(Comparator.comparingInt(DbServer::getQueryCount)).collect(Collectors.toList());
-
+            // 优先返回只读节点
+            List<DbServer> dbServerList;
+            if (isReaderPriority && hasReaderNode(serverReadReplicaList)) {
+                dbServerList = serverReadReplicaList.stream()
+                        .filter(dbServer->Role.READ_REPLICA.equals(dbServer.getRole())).collect(Collectors.toList());
+            } else {
+                dbServerList = serverReadReplicaList.stream()
+                        .sorted(Comparator.comparingInt(DbServer::getQueryCount)).collect(Collectors.toList());
+            }
             return !dbServerList.isEmpty() ? dbServerList.get(0) : null;
         } catch (Exception e) {
             LOGGER.error("Get reader error!");
         }
         return null;
+    }
+
+    /**
+     * @param
+     * @return
+     * @Description: TODO(节点服务列表中是否有只读节点)
+     */
+    private boolean hasReaderNode(List<DbServer> serverReadReplicaList) {
+        for (DbServer dbServer : serverReadReplicaList) {
+            if (Role.READ_REPLICA.equals(dbServer.getRole())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public String getReaderHttp() {
