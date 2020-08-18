@@ -66,7 +66,7 @@ public class HttpService {
             String uriPath = uri.getPath();
             String csvName = uriPath.split("/")
                     .clone()[uriPath.split("/").length - 1];
-            String csvContent = FileUtil.getFileContent(NeoUrl.NEO_CSV.getSymbolValue(), csvName);
+            String csvContent = FileUtil.getFileContent(NeoUrl.NEO_CSV.getSymbolValue()+"/"+csvName, "UTF-8");
             int length = 0;
             if (csvContent != null) {
 
@@ -131,7 +131,7 @@ public class HttpService {
     }
 
     public static void main(String[] args) throws IOException {
-        PropertyConfigurator.configureAndWatch("config" + File.separator + "log4j.properties");
+        PropertyConfigurator.configureAndWatch("conf" + File.separator + "log4j.properties");
         new HttpService().run();
     }
 
