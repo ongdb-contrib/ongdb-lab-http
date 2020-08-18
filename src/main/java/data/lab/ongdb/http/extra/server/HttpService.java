@@ -36,12 +36,14 @@ public class HttpService {
 
     private static String urlInterface;
 
+    private static final int DEFALUT_PORT=8000;
+
     public static String getUrlInterface() {
         return urlInterface;
     }
 
     public static void setUrlInterface(String uri) throws UnknownHostException {
-        HttpService.urlInterface = "http://" + getLocalhostIP() + ":8000" + uri;
+        HttpService.urlInterface = "http://" + getLocalhostIP() + ":"+DEFALUT_PORT+"" + uri;
     }
 
     public static void setUrlInterface(String uri, int port) throws UnknownHostException {
@@ -69,15 +71,13 @@ public class HttpService {
             String csvContent = FileUtil.getFileContent(NeoUrl.NEO_CSV.getSymbolValue()+"/"+csvName, "UTF-8");
             int length = 0;
             if (csvContent != null) {
-
                 // SOLVE-PROBLEM-CORS:No 'Access-Control-Allow-Origin' header is present on the requested resource.
                 Headers responseHeaders = httpExchange.getResponseHeaders();
                 responseHeaders.set("Access-Control-Allow-Origin", "*");
-
-                length = csvContent.getBytes().length;
+                length = csvContent.getBytes("UTF-8").length;
                 httpExchange.sendResponseHeaders(200, length);
                 OutputStream outputStream = httpExchange.getResponseBody();
-                outputStream.write(csvContent.getBytes());
+                outputStream.write(csvContent.getBytes("UTF-8"));
                 outputStream.close();
             }
             logger.info("URI:" + uriPath + " CSV:" + csvName + " CSV-LENGTH:" + length);
@@ -119,7 +119,7 @@ public class HttpService {
                 String uri = "/" + NeoUrl.NEO_CSV.getSymbolValue();
                 setUrlInterface(uri);
                 logger.info("Start http service:" + uri);
-                HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+                HttpServer server = HttpServer.create(new InetSocketAddress(DEFALUT_PORT), 0);
                 server.createContext(uri, new NeoCsvHandle());
                 server.setExecutor(Executors.newCachedThreadPool());
                 server.start();
