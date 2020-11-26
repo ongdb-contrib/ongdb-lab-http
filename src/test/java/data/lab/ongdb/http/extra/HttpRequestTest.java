@@ -69,5 +69,24 @@ public class HttpRequestTest {
         String result = request.httpPost(url, query);
         System.out.println(result);
     }
+
+    @Test
+    public void httpPost02() {
+        HttpRequest request = new HttpRequest("ongdb","datalab%pro");
+        String url = "http://localhost/db/data/transaction/commit";
+        String query = "{\n" +
+                "    \"statements\": [\n" +
+                "        {\n" +
+                "            \"statement\": \"MATCH (n:HEvent)--() RETURN n LIMIT 1000000\",\n" +
+                "            \"resultDataContents\": [\n" +
+                "                \"row\",\n" +
+                "                \"graph\"\n" +
+                "            ]\n" +
+                "        }\n" +
+                "    ]\n" +
+                "}";
+        String result = request.httpPost(url, query);
+        System.out.println(result);
+    }
 }
 
