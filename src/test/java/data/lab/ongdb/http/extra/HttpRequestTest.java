@@ -5,8 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
-
-import static org.junit.Assert.*;
+import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /*
  *
@@ -22,7 +23,8 @@ import static org.junit.Assert.*;
  */
 public class HttpRequestTest {
 
-    private HttpRequest request = new HttpRequest("neo4j", "datalab%pro");
+    //    private HttpRequest request = new HttpRequest("neo4j", "datalab%pro");
+    private HttpRequest request = new HttpRequest("ongdb", "datalab%pro");
 
     // PRO
     private String server = "http://pro-ongdb-1:7474";
@@ -72,21 +74,47 @@ public class HttpRequestTest {
 
     @Test
     public void httpPost02() {
-        HttpRequest request = new HttpRequest("ongdb","datalab%pro");
-        String url = "http://localhost/db/data/transaction/commit";
-        String query = "{\n" +
-                "    \"statements\": [\n" +
-                "        {\n" +
-                "            \"statement\": \"MATCH (n:HEvent)--() RETURN n LIMIT 1000000\",\n" +
-                "            \"resultDataContents\": [\n" +
-                "                \"row\",\n" +
-                "                \"graph\"\n" +
-                "            ]\n" +
-                "        }\n" +
-                "    ]\n" +
-                "}";
-        String result = request.httpPost(url, query);
-        System.out.println(result);
+        CountDownLatch ctl = new CountDownLatch(10000);
+        for (int i = 0; i < 10000; i++) {
+            Async async = new Async();
+            async.setCountDownLatch(ctl);
+            Thread thread = new Thread(async);
+            thread.start();
+        }
+        try {
+            ctl.await(6, TimeUnit.DAYS); //等待多久为超时
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public class Async implements Runnable {
+        private CountDownLatch countDownLatch;
+
+        public void setCountDownLatch(CountDownLatch countDownLatch) {
+            this.countDownLatch = countDownLatch;
+        }
+
+        @Override
+        public void run() {
+            System.out.println("返回正在执行该代码的线程名称:" + Thread.currentThread().getName());
+            String url = "http://10.20.13.200/db/data/transaction/commit";
+            String query = "{\n" +
+                    "    \"statements\": [\n" +
+                    "        {\n" +
+                    "            \"statement\": \"MATCH (n:HEvent)--() RETURN n LIMIT 10000\",\n" +
+                    "            \"resultDataContents\": [\n" +
+                    "                \"row\",\n" +
+                    "                \"graph\"\n" +
+                    "            ]\n" +
+                    "        }\n" +
+                    "    ]\n" +
+                    "}";
+            request.httpPost(url, query);
+            System.out.println("ok..."+ new Random().nextInt());
+            countDownLatch.countDown();
+        }
     }
 }
 
