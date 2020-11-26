@@ -37,13 +37,13 @@ public class HttpRequestTest {
 
     @Test
     public void httpGet() {
-        String queryResult = request.httpGet(server+"/user/neo4j");
+        String queryResult = request.httpGet(server + "/user/neo4j");
         System.out.println(queryResult);
     }
 
     @Test
     public void httpPost() {
-        String query="{\n" +
+        String query = "{\n" +
                 "    \"statements\": [\n" +
                 "        {\n" +
                 "            \"statement\": \"CALL dbms.cluster.overview();\"\n" +
@@ -51,9 +51,23 @@ public class HttpRequestTest {
                 "    ]\n" +
                 "}\n" +
                 "\n";
-        String result = request.httpPost(server+"/db/data/transaction/commit",query);
+        String result = request.httpPost(server + "/db/data/transaction/commit", query);
         System.out.println(result);
     }
 
+    @Test
+    public void httpPost01() {
+        HttpRequest request = new HttpRequest();
+        String url = "http://localhost/ongdb/graphql";
+        String query = "{\n" +
+                "    \"query\": \"query myConcernedCompany($name: String, $location: String, $isListed: Boolean, $isBond: Boolean, $tag: String, $sourceCode: String, $sourceFlag: String) {\\n  horgByName(name: $name, location: $location, tag: $tag, isListed: $isListed, isBond: $isBond, sourceCode: $sourceCode, sourceFlag: $sourceFlag) {\\n    name\\n    hcode\\n  }\\n}\\n\",\n" +
+                "    \"variables\": {\n" +
+                "        \"name\": \"四川和邦生物科技股份有限公司\"\n" +
+                "    },\n" +
+                "    \"operationName\": \"myConcernedCompany\"\n" +
+                "}";
+        String result = request.httpPost(url, query);
+        System.out.println(result);
+    }
 }
 
