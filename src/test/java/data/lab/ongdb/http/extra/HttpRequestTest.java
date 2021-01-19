@@ -1,6 +1,7 @@
 package data.lab.ongdb.http.extra;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.frameworkset.spi.async.annotation.Async;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -58,9 +59,9 @@ public class HttpRequestTest {
     }
 
     @Test
-    public void httpPost01() {
+    public void httpPost_01() {
         HttpRequest request = new HttpRequest();
-        String url = "http://localhost/ongdb/graphql";
+        String url = "http://10.20.13.130/ongdb/graphql";
         String query = "{\n" +
                 "    \"query\": \"query myConcernedCompany($name: String, $location: String, $isListed: Boolean, $isBond: Boolean, $tag: String, $sourceCode: String, $sourceFlag: String) {\\n  horgByName(name: $name, location: $location, tag: $tag, isListed: $isListed, isBond: $isBond, sourceCode: $sourceCode, sourceFlag: $sourceFlag) {\\n    name\\n    hcode\\n  }\\n}\\n\",\n" +
                 "    \"variables\": {\n" +
@@ -69,6 +70,21 @@ public class HttpRequestTest {
                 "    \"operationName\": \"myConcernedCompany\"\n" +
                 "}";
         String result = request.httpPost(url, query);
+        System.out.println(result);
+    }
+
+    @Test
+    public void httpPost_02() {
+        HttpProxyRequest httpProxyRequest = new HttpProxyRequest();
+        String url = "http://10.20.13.130/ongdb/graphql";
+        String query = "{\n" +
+                "    \"query\": \"query myConcernedCompany($name: String, $location: String, $isListed: Boolean, $isBond: Boolean, $tag: String, $sourceCode: String, $sourceFlag: String) {\\n  horgByName(name: $name, location: $location, tag: $tag, isListed: $isListed, isBond: $isBond, sourceCode: $sourceCode, sourceFlag: $sourceFlag) {\\n    name\\n    hcode\\n  }\\n}\\n\",\n" +
+                "    \"variables\": {\n" +
+                "        \"name\": \"四川和邦生物科技股份有限公司\"\n" +
+                "    },\n" +
+                "    \"operationName\": \"myConcernedCompany\"\n" +
+                "}";
+        String result = httpProxyRequest.httpPost(url, query);
         System.out.println(result);
     }
 

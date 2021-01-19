@@ -51,16 +51,19 @@ public class HttpProxyRequest extends HttpRequestProxy implements HttpInter {
     /**
      * 指定HTTP POOL NAME
      **/
-    private static String poolname;
+    private static String poolname="DEFAULT";
 
     /**
      * 服务器授权验证
      **/
     private static String authBase64;
 
-    public HttpProxyRequest(String poolname, String authAccount, String authPassword) {
-        this.poolname = poolname;
-        this.authBase64 = "Basic " + Base64Digest.encoder(authAccount + ":" + authPassword);
+    public HttpProxyRequest() {
+    }
+
+    public HttpProxyRequest(String poolName, String authAccount, String authPassword) {
+        poolname = poolName;
+        authBase64 = "Basic " + Base64Digest.encoder(authAccount + ":" + authPassword);
     }
 
     /**
