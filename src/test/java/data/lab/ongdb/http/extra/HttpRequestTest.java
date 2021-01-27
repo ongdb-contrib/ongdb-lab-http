@@ -94,9 +94,9 @@ public class HttpRequestTest {
         String url = "http://10.20.0.157:7474/db/data/transaction/commit";
         String query = "{\n" +
                 "  \"statements\" : [ {\n" +
-                "    \"statement\" : \"CREATE (n:Test01231225)\"\n" +
+                "    \"statement\" : \"CREATE (n:Test01231225asd)\"\n" +
                 "  }, {\n" +
-                "    \"statement\" : \"CREATE (n:Test012312)\"\n" +
+                "    \"statement\" : \"CREATE (n:Test012312asd)\"\n" +
                 "  } ]\n" +
                 "}";
         String result = httpProxyRequest.httpPost(url, query);
