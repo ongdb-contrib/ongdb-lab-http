@@ -89,6 +89,21 @@ public class HttpRequestTest {
     }
 
     @Test
+    public void httpPost_03() {
+        HttpProxyRequest httpProxyRequest = new HttpProxyRequest("DEFAULT","neo4j","123456");
+        String url = "http://10.20.0.157:7474/db/data/transaction/commit";
+        String query = "{\n" +
+                "  \"statements\" : [ {\n" +
+                "    \"statement\" : \"CREATE (n:Test01231225)\"\n" +
+                "  }, {\n" +
+                "    \"statement\" : \"CREATE (n:Test012312)\"\n" +
+                "  } ]\n" +
+                "}";
+        String result = httpProxyRequest.httpPost(url, query);
+        System.out.println(result);
+    }
+
+    @Test
     public void httpPost02() {
         CountDownLatch ctl = new CountDownLatch(10000);
         for (int i = 0; i < 10000; i++) {
