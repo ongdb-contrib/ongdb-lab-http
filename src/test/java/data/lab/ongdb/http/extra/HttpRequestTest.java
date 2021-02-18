@@ -134,7 +134,7 @@ public class HttpRequestTest {
             String query = "{\n" +
                     "    \"statements\": [\n" +
                     "        {\n" +
-                    "            \"statement\": \"MATCH (n:HEvent)--() RETURN n LIMIT 10000\",\n" +
+                    "            \"statement\": \"MATCH (n:HEvent)--() RETURN n LIMIT 10\",\n" +
                     "            \"resultDataContents\": [\n" +
                     "                \"row\",\n" +
                     "                \"graph\"\n" +
