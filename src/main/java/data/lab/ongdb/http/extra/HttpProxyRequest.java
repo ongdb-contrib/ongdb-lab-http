@@ -61,6 +61,10 @@ public class HttpProxyRequest extends HttpRequestProxy implements HttpInter {
     public HttpProxyRequest() {
     }
 
+    public HttpProxyRequest(String authAccount, String authPassword) {
+        authBase64 = "Basic " + Base64Digest.encoder(authAccount + ":" + authPassword);
+    }
+
     public HttpProxyRequest(String poolName, String authAccount, String authPassword) {
         poolname = poolName;
         authBase64 = "Basic " + Base64Digest.encoder(authAccount + ":" + authPassword);

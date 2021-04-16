@@ -24,7 +24,8 @@ public class HttpProxyRegisterTest {
     /**
      * http访问对象 支持绝对接口地址和相对接口地址
      **/
-    private HttpProxyRequest request = new HttpProxyRequest("DEFAULT", "neo4j", "datalab%pro");
+//    private HttpProxyRequest request = new HttpProxyRequest("DEFAULT", "ongdb", "datalab%pro");
+    private HttpProxyRequest request = new HttpProxyRequest("ongdb", "datalab%pro");
 
     @Before
     public void setUp() throws Exception {
@@ -36,7 +37,7 @@ public class HttpProxyRegisterTest {
 
     @Test
     public void name() {
-        String query="{\n" +
+        String query = "{\n" +
                 "    \"statements\": [\n" +
                 "        {\n" +
                 "            \"statement\": \"CALL dbms.cluster.overview();\"\n" +
@@ -44,7 +45,7 @@ public class HttpProxyRegisterTest {
                 "    ]\n" +
                 "}\n" +
                 "\n";
-        String result = request.httpPost("/db/data/transaction/commit",query);
+        String result = request.httpPost("/db/data/transaction/commit", query);
         System.out.println(result);
     }
 
